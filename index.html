@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Headline Machine</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #121212; color: #e8e0d8; min-height: 100vh; }
+
+header { background: #1a1a1a; border-bottom: 0.5px solid #2e2e2e; padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.header-left h1 { font-size: 16px; font-weight: 500; color: #e8e0d8; }
+.header-left p { font-size: 12px; color: #6b6560; margin-top: 2px; }
+.settings-btn { background: none; border: 0.5px solid #2e2e2e; border-radius: 8px; padding: 7px 16px; font-size: 12px; font-family: inherit; color: #6b6560; cursor: pointer; letter-spacing: .04em; transition: border-color .2s, color .2s; }
+.settings-btn:hover { border-color: #c8b89a; color: #e8e0d8; }
+.settings-btn.active { border-color: #c8b89a; color: #c8b89a; }
+
+.prompt-editor { display: none; background: #1a1a1a; border: 0.5px solid #2e2e2e; border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; }
+.prompt-editor.open { display: block; }
+.editor-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.editor-label { font-size: 11px; font-weight: 500; color: #6b6560; text-transform: uppercase; letter-spacing: .08em; }
+.editor-actions { display: flex; gap: 8px; align-items: center; }
+.saved-badge { font-size: 12px; color: #7ab060; opacity: 0; transition: opacity .3s; }
+.saved-badge.show { opacity: 1; }
+.pill-btn { background: none; border: 0.5px solid #2e2e2e; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-family: inherit; color: #9a8f85; cursor: pointer; transition: all .2s; }
+.pill-btn:hover { border-color: #c8b89a; color: #e8e0d8; }
+.pill-btn.save { background: #e8e0d8; color: #121212; border-color: #e8e0d8; }
+.pill-btn.save:hover { background: #fff; }
+#promptEditorArea { width: 100%; background: #111; border: 0.5px solid #2e2e2e; border-radius: 10px; padding: 16px; font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace; color: #c8b89a; resize: vertical; min-height: 220px; outline: none; transition: border-color .2s; line-height: 1.6; }
+#promptEditorArea:focus { border-color: #c8b89a; }
+
+.container { max-width: 820px; margin: 0 auto; padding: 28px 20px; }
+
+.input-card { background: #1a1a1a; border: 0.5px solid #2e2e2e; border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; }
+.input-label { font-size: 11px; font-weight: 500; color: #6b6560; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; display: block; }
+textarea#mainInput { width: 100%; background: #111; border: 0.5px solid #2e2e2e; border-radius: 10px; padding: 14px 16px; font-size: 14px; font-family: inherit; color: #e8e0d8; resize: vertical; min-height: 120px; outline: none; transition: border-color .2s; line-height: 1.6; }
+textarea#mainInput::placeholder { color: #4a4540; }
+textarea#mainInput:focus { border-color: #c8b89a; }
+
+.btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.gen-btn { background: #e8e0d8; color: #121212; border: none; border-radius: 10px; padding: 12px 24px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: background .2s; }
+.gen-btn:hover { background: #fff; }
+.gen-btn:disabled { opacity: .35; cursor: not-allowed; }
+.angle-btn { background: none; border: 0.5px solid #2e2e2e; border-radius: 10px; padding: 10px 18px; font-size: 13px; font-family: inherit; color: #9a8f85; cursor: pointer; transition: all .2s; }
+.angle-btn:hover { border-color: #c8b89a; color: #e8e0d8; }
+.angle-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+#status { font-size: 13px; color: #6b6560; margin-top: 10px; min-height: 18px; }
+.dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #c8b89a; margin: 0 2px; animation: pulse .9s infinite alternate; }
+.dot:nth-child(2) { animation-delay: .3s; }
+.dot:nth-child(3) { animation-delay: .6s; }
+@keyframes pulse { from { opacity: .2; } to { opacity: 1; } }
+
+#output { display: none; }
+.angle-section { background: #1a1a1a; border: 0.5px solid #2e2e2e; border-radius: 14px; padding: 20px 24px; margin-bottom: 14px; }
+.angle-title { font-size: 11px; font-weight: 500; color: #6b6560; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.angle-icon { font-size: 14px; }
+.headline-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid #2e2e2e; }
+.headline-item:last-child { border-bottom: none; padding-bottom: 0; }
+.headline-text { font-size: 14px; line-height: 1.6; color: #d4ccc4; flex: 1; }
+.copy-hl { background: none; border: 0.5px solid #2e2e2e; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-family: inherit; color: #6b6560; cursor: pointer; white-space: nowrap; transition: all .2s; flex-shrink: 0; }
+.copy-hl:hover { border-color: #c8b89a; color: #e8e0d8; }
+.copy-hl.copied { color: #7ab060; border-color: #7ab060; }
+
+.output-toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; gap: 8px; }
+.tool-btn { background: none; border: 0.5px solid #2e2e2e; border-radius: 8px; padding: 7px 16px; font-size: 12px; font-family: inherit; color: #9a8f85; cursor: pointer; transition: all .2s; }
+.tool-btn:hover { border-color: #c8b89a; color: #e8e0d8; }
+.error-bar { background: #1a1a1a; border: 0.5px solid #c87070; color: #c87070; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>headline machine</h1>
+    <p>5 angles · proven CTR patterns</p>
+  </div>
+  <button class="settings-btn" id="settingsToggle" onclick="toggleEditor()">Prompt editor</button>
+</header>
+
+<div class="container">
+
+  <div class="prompt-editor" id="promptEditorWrap">
+    <div class="editor-header">
+      <div class="editor-label">System prompt <span class="saved-badge" id="savedBadge">Saved</span></div>
+      <div class="editor-actions">
+        <button class="pill-btn" onclick="resetPrompt()">Reset to default</button>
+        <button class="pill-btn save" onclick="savePrompt()">Save</button>
+      </div>
+    </div>
+    <textarea id="promptEditorArea"></textarea>
+  </div>
+
+  <div class="input-card">
+    <label class="input-label">Raw headline, article text, URL, or topic</label>
+    <textarea id="mainInput" placeholder="Paste a raw headline, article text, URL, or describe the story…"></textarea>
+    <div class="btn-row">
+      <button class="gen-btn" id="genBtn" onclick="generate('all')">Generate all 5 angles</button>
+      <button class="angle-btn" id="regenBtn" onclick="generate('more')" style="display:none">+ More headlines</button>
+    </div>
+    <div id="status"></div>
+  </div>
+
+  <div id="errorBar" class="error-bar"></div>
+
+  <div id="output">
+    <div class="output-toolbar">
+      <button class="tool-btn" onclick="copyAll()">Copy all</button>
+      <button class="tool-btn" onclick="resetOutput()">Clear</button>
+    </div>
+    <div id="anglesSections"></div>
+  </div>
+
+</div>
+
+<script>
+const DEFAULT_PROMPT = `## ABSOLUTE RULE — ZERO INVENTED FACTS
+NEVER invent quotes, numbers, timestamps, or details not present in the input.
+NEVER write "She said...", "He revealed...", "Sources claim..." unless that exact quote was provided.
+If only a raw headline is given — work ONLY with those words.
+Before generating: ask "Is every fact in this headline present in what the user gave me?" If NO — remove it.
+
+## ROLE
+You are an expert headline writer for a Facebook news/media page. Generate headlines based on proven high-CTR patterns.
+
+## STYLE REFERENCE — TOP-PERFORMING EXAMPLES
+These headlines achieved the highest CTR. Study their structure, voice, and rhythm. Do NOT copy them — use them as a style compass only:
+
+1. Two Photos Expose WHAT WAS FOUND in Renee Good's Car After Deadly ICE Agent Shooting
+2. ICE Agent's Father Speaks for the First Time, Telling HIS SIDE OF THE INCIDENT That Happened Near Renee Nicole Good's Car
+3. Minnesota Officials Reveal WHY Renee Nicole Good Was Stopped by ICE — And It May Be Connected to Her WORK
+4. A Witness Who FIRST REACHED Alex Pretti's BODY Revealed the SHOCKING THING ICE Agents WERE DOING Right After the Tragedy
+5. "Why Does She Do That": All Eyes Are on Goldie Hawn's MOUTH MOVEMENTS Next to Her Partner at the 2026 Oscars (2 Videos)
+6. Nancy Guthrie's CONTROVERSIAL LAST POST Shared Only Days Before Disappearance – And It Mentioned U.S. AUTHORITIES
+7. "I Would Not Touch My Son's Chest Like That": Warm Red Carpet Moment Between Goldie Hawn, 80, and Her Son, 49, Goes Viral
+8. "Look at Michelle's Nails": All Eyes Were on Barack Obama's Wife's HANDS at a Basketball Game
+9. Plastic Surgeons Reveal WHY KRISTI NOEM LOOKS SO DIFFERENT at 54 (Showcased in 30+ Photos)
+10. Police Finally Know WHAT HAPPENED in the FINAL HOURS Before Nancy Guthrie's Disappearance — It All Started Around 9:30 PM
+11. Nancy Guthrie Update: Neighbor Reveals TWO KEY DETAILS He Witnessed BEFORE AND AFTER She Suddenly Vanished
+12. Father of 3, Family Rancher, and Successful Businessman — 50+ Rare Photos of Kristi Noem's HUSBAND OF 33 YEARS, Who Stood by Her Before Politics
+13. 30+ Rare Photos Reveal Chuck Norris' FAMILY RANCH Where He RAISED TWINS & NURSED HIS WIFE Before His Death at 86
+14. Chuck Norris DIES After a Hospitalization — Family REVEALED HIS FINAL MOMENTS
+15. Chuck Norris Put His CAREER ON HOLD for Months to Take Care of His BEDRIDDEN WIFE — Now She Has LOST Her "Wonderful Husband" at 86
+16. Eric Dane's Girlfriend Is Told to "Have Some Respect" After Sharing 5+ "INAPPROPRIATE" Intimate Photos
+17. "Super Pregnant": Zendaya's New Holiday Photo With Fiancé and His Parents Sparks Buzz
+18. "She Looks Amazing": Former Child Star Amanda Bynes, 39, Stuns Fans With Her TONED BODY and Abs After Losing 30 lbs
+19. Caroline Kennedy SEEN FOR THE FIRST TIME Since Tatiana's Death, Clutching Her Granddaughter With a Face of "Complete Devastation"
+20. Fans Shocked by Tatiana Schlossberg's Eerie Resemblance to Mom in a Photo Released After Death: "A Spitting Image"
+
+## OUTPUT FORMAT — ALWAYS 5 ANGLES
+Return ONLY a raw JSON object. No markdown. No explanation. No intro text:
+{
+  "shock": ["headline1", "headline2", "headline3", "headline4", "headline5"],
+  "inspiration": ["headline1", "headline2", "headline3", "headline4", "headline5"],
+  "controversy": ["headline1", "headline2", "headline3", "headline4", "headline5"],
+  "personal": ["headline1", "headline2", "headline3", "headline4", "headline5"],
+  "numbers": ["headline1", "headline2", "headline3", "headline4", "headline5"]
+}
+Each angle must have exactly 5 headlines. 7 headlines if the user asks for more.
+
+## ANGLE DEFINITIONS
+SHOCK — Lead with the most disturbing, unexpected or hard-to-believe fact. Trigger words: BONE-CHILLING · DISTURBING · NOBODY SAW COMING · ALL ALONG · TURNS OUT · SINISTER
+INSPIRATION — Lead with survival, sacrifice, resilience or unexpected triumph. Trigger words: DESPITE · WALKED AWAY · CHOSE TO · STOOD BY · NEVER GAVE UP · SURVIVED
+CONTROVERSY — Lead with conflict, public reactions or scandal. Trigger words: UNDER FIRE · RAISES MORE QUESTIONS · PEOPLE ARE NOT HOLDING BACK · BLUNT REACTION · EVASIVE
+PERSONAL STORY — Lead with a specific person, relationship or intimate detail. Trigger words: FINAL WORDS · LAST WISH · DAUGHTER · WIDOW · FOR THE FIRST TIME · BREAKS SILENCE · GUT-WRENCHING
+NUMBERS — Lead with a specific stat, amount, count or timeframe. Trigger words: $[AMOUNT] · [N] YEARS · AT JUST [AGE] · [N] HOURS BEFORE · [N] PHOTOS · [EXACT TIME]
+
+## TOP HOOK PATTERNS (use these structures)
+1. "QUOTE": rest of headline
+2. REVEALED: / UNCOVERED: / EXPOSED:
+3. Everyone Thought [X] — But [contradiction]
+4. [Fact] — [Unexpected twist after em dash]
+5. Finally Breaks Silence / Police Finally Know / Finally Reveals
+6. One Thing / One Decision / One Moment
+7. [N] Sharp/Blunt/Encouraging Words
+8. Role + Role + N Facts About [Person]
+9. [Positive milestone] — Days Later [tragedy]
+10. [N]+ Rare / Little-Seen / Private Photos
+11. People/Fans React — quote-style reaction
+12. Final Photo / Post / Moments / Words
+13. What Was Found / What [Person] Did
+14. All Along Revelation — Turns Out / Was There All Along
+15. Seen for the First Time Since [event]
+
+## TECHNICAL RULES
+- 10–18 words per headline
+- CAPS on 1–2 highest-impact words per headline (never full caps, never filler words)
+- Numbers always specific ("12 hours" not "several hours")
+- Em dash (—) separates fact from twist in ~60% of headlines
+- Curiosity gap: reader must NOT get the full answer from headline alone
+- NEVER use "phrase. phrase. phrase." structure
+
+## FORBIDDEN WORDS — NEVER USE
+kill/killer · murder · attack · assault · shoot/shooting · stab · blood/gore · torture · weapon · gun · knife · war · racism · nazi · suicide · self-harm · overdose · sex/sexual · nude · porn · rape · underage · minor · drugs · cocaine · heroin · scam · fraud · fuck · shit · bitch · abortion · miscarriage
+
+## FORBIDDEN PATTERNS — NEVER USE
+"turned into a nightmare" · "ended in disaster" · "what happened next will shock you" · "this changes everything" · "the shocking reason behind" · "you won't believe" · "wait until you see" · "heartbreaking betrayal" · "shocking twist" · "jaw-dropping moment" · "fans are furious" · "sparks outrage" · "comment YES if" · "tag someone who" · "share if you agree" · "everyone is talking about"`;
+
+const ANGLES = [
+  { key: "shock",       label: "Shock",         icon: "⚡" },
+  { key: "inspiration", label: "Inspiration",   icon: "✨" },
+  { key: "controversy", label: "Controversy",   icon: "🔥" },
+  { key: "personal",    label: "Personal Story", icon: "🤍" },
+  { key: "numbers",     label: "Numbers",        icon: "📊" },
+];
+
+let currentPrompt = localStorage.getItem("headlineMachinePrompt") || DEFAULT_PROMPT;
+let lastInput = "";
+let lastResult = null;
+document.getElementById("promptEditorArea").value = currentPrompt;
+
+function toggleEditor() {
+  const wrap = document.getElementById("promptEditorWrap");
+  const btn = document.getElementById("settingsToggle");
+  wrap.classList.toggle("open");
+  btn.classList.toggle("active", wrap.classList.contains("open"));
+}
+function savePrompt() {
+  currentPrompt = document.getElementById("promptEditorArea").value;
+  localStorage.setItem("headlineMachinePrompt", currentPrompt);
+  showSaved();
+}
+function resetPrompt() {
+  document.getElementById("promptEditorArea").value = DEFAULT_PROMPT;
+  currentPrompt = DEFAULT_PROMPT;
+  localStorage.setItem("headlineMachinePrompt", DEFAULT_PROMPT);
+  showSaved();
+}
+function showSaved() {
+  const b = document.getElementById("savedBadge");
+  b.classList.add("show");
+  setTimeout(() => b.classList.remove("show"), 2000);
+}
+
+async function generate(mode) {
+  const input = document.getElementById("mainInput").value.trim();
+  if (!input) return;
+  lastInput = input;
+
+  const btn = document.getElementById("genBtn");
+  const regenBtn = document.getElementById("regenBtn");
+  btn.disabled = true;
+  regenBtn.disabled = true;
+  setStatus(true);
+  setError("");
+
+  const userMsg = mode === "more"
+    ? `${input}\n\nGenerate 7 DIFFERENT headlines per angle. Do not repeat any headline from before.`
+    : input;
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 2000,
+        system: currentPrompt,
+        messages: [{ role: "user", content: userMsg }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("No JSON in response");
+    lastResult = JSON.parse(match[0]);
+    renderOutput(lastResult);
+    document.getElementById("regenBtn").style.display = "inline-block";
+  } catch(e) {
+    setError("Error: " + e.message);
+  }
+
+  btn.disabled = false;
+  regenBtn.disabled = false;
+  setStatus(false);
+}
+
+function setStatus(loading) {
+  document.getElementById("status").innerHTML = loading
+    ? '<span class="dot"></span><span class="dot"></span><span class="dot"></span>'
+    : "";
+}
+function setError(msg) {
+  const el = document.getElementById("errorBar");
+  el.style.display = msg ? "block" : "none";
+  el.textContent = msg;
+}
+
+function renderOutput(result) {
+  const out = document.getElementById("output");
+  const sections = document.getElementById("anglesSections");
+  out.style.display = "block";
+
+  sections.innerHTML = ANGLES.map(a => {
+    const headlines = result[a.key] || [];
+    return `<div class="angle-section">
+      <div class="angle-title"><span class="angle-icon">${a.icon}</span>${a.label}</div>
+      ${headlines.map((h, i) => `
+        <div class="headline-item">
+          <div class="headline-text">${h}</div>
+          <button class="copy-hl" onclick="copyHeadline(this, '${h.replace(/'/g, "\\'")}')">Copy</button>
+        </div>`).join("")}
+    </div>`;
+  }).join("");
+
+  out.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function copyHeadline(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "Copied";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 2000);
+  });
+}
+
+function copyAll() {
+  if (!lastResult) return;
+  const lines = ANGLES.flatMap(a => {
+    const hs = lastResult[a.key] || [];
+    return [`\n${a.label.toUpperCase()}`, ...hs];
+  });
+  navigator.clipboard.writeText(lines.join("\n")).then(() => {
+    const btn = document.querySelector(".output-toolbar .tool-btn");
+    btn.textContent = "Copied!";
+    setTimeout(() => btn.textContent = "Copy all", 2000);
+  });
+}
+
+function resetOutput() {
+  document.getElementById("output").style.display = "none";
+  document.getElementById("mainInput").value = "";
+  document.getElementById("regenBtn").style.display = "none";
+  lastResult = null;
+  lastInput = "";
+}
+
+document.getElementById("mainInput").addEventListener("keydown", e => {
+  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) generate("all");
+});
+</script>
+</body>
+</html>
