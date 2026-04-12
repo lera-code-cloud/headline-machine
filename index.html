@@ -31,11 +31,42 @@ header { background: #1a1a1a; border-bottom: 0.5px solid #2e2e2e; padding: 18px 
 
 .container { max-width: 820px; margin: 0 auto; padding: 28px 20px; }
 
+.mode-toggle { display: flex; gap: 0; margin-bottom: 20px; border: 0.5px solid #2e2e2e; border-radius: 10px; overflow: hidden; width: fit-content; }
+.mode-btn { background: none; border: none; padding: 9px 20px; font-size: 13px; font-family: inherit; color: #6b6560; cursor: pointer; transition: all .2s; white-space: nowrap; }
+.mode-btn:hover { color: #e8e0d8; background: #1f1f1f; }
+.mode-btn.active { background: #e8e0d8; color: #121212; font-weight: 500; }
+
 .input-card { background: #1a1a1a; border: 0.5px solid #2e2e2e; border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; }
 .input-label { font-size: 11px; font-weight: 500; color: #6b6560; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; display: block; }
+.input-hint { font-size: 12px; color: #4a4540; margin-bottom: 10px; line-height: 1.5; }
 textarea#mainInput { width: 100%; background: #111; border: 0.5px solid #2e2e2e; border-radius: 10px; padding: 14px 16px; font-size: 14px; font-family: inherit; color: #e8e0d8; resize: vertical; min-height: 120px; outline: none; transition: border-color .2s; line-height: 1.6; }
 textarea#mainInput::placeholder { color: #4a4540; }
 textarea#mainInput:focus { border-color: #c8b89a; }
+
+/* input type indicator */
+.input-type-badge { display: none; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; color: #6b6560; }
+.input-type-badge.visible { display: flex; }
+.input-type-dot { width: 6px; height: 6px; border-radius: 50%; background: #c8b89a; flex-shrink: 0; }
+.input-type-dot.img { background: #7ab060; }
+.input-type-dot.url { background: #a0b8e8; }
+
+.intrigue-card { background: #1a1a1a; border: 0.5px solid #2e2e2e; border-radius: 16px; padding: 20px 28px; margin-bottom: 20px; }
+.intrigue-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.intrigue-label { font-size: 11px; font-weight: 500; color: #6b6560; text-transform: uppercase; letter-spacing: .08em; }
+.optional-badge { font-size: 11px; color: #4a4540; background: #111; border: 0.5px solid #2e2e2e; border-radius: 6px; padding: 2px 8px; }
+textarea#intrigueInput { width: 100%; background: #111; border: 0.5px solid #2e2e2e; border-radius: 10px; padding: 14px 16px; font-size: 14px; font-family: inherit; color: #e8e0d8; resize: vertical; min-height: 72px; outline: none; transition: border-color .2s; line-height: 1.6; }
+textarea#intrigueInput::placeholder { color: #4a4540; }
+textarea#intrigueInput:focus { border-color: #c8b89a; }
+
+.photo-fields { display: none; }
+.photo-fields.visible { display: block; }
+.photo-row { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+.photo-row .field-group { flex: 1; min-width: 140px; }
+.field-group label { font-size: 11px; font-weight: 500; color: #6b6560; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; display: block; }
+.field-group input, .field-group select { width: 100%; background: #111; border: 0.5px solid #2e2e2e; border-radius: 10px; padding: 11px 14px; font-size: 14px; font-family: inherit; color: #e8e0d8; outline: none; transition: border-color .2s; }
+.field-group input::placeholder { color: #4a4540; }
+.field-group input:focus, .field-group select:focus { border-color: #c8b89a; }
+.field-group select option { background: #1a1a1a; }
 
 .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 .gen-btn { background: #e8e0d8; color: #121212; border: none; border-radius: 10px; padding: 12px 24px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: background .2s; }
@@ -66,6 +97,10 @@ textarea#mainInput:focus { border-color: #c8b89a; }
 .tool-btn { background: none; border: 0.5px solid #2e2e2e; border-radius: 8px; padding: 7px 16px; font-size: 12px; font-family: inherit; color: #9a8f85; cursor: pointer; transition: all .2s; }
 .tool-btn:hover { border-color: #c8b89a; color: #e8e0d8; }
 .error-bar { background: #1a1a1a; border: 0.5px solid #c87070; color: #c87070; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
+
+.mode-badge { display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 5px; margin-left: 6px; vertical-align: middle; }
+.mode-badge.news { background: #1f2a1f; color: #7ab060; border: 0.5px solid #3a5a3a; }
+.mode-badge.photo { background: #2a1f2a; color: #c8a0e8; border: 0.5px solid #5a3a6a; }
 </style>
 </head>
 <body>
@@ -91,14 +126,55 @@ textarea#mainInput:focus { border-color: #c8b89a; }
     <textarea id="promptEditorArea"></textarea>
   </div>
 
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeNews" onclick="setMode('news')">📰 News article</button>
+    <button class="mode-btn" id="modePhoto" onclick="setMode('photo')">📸 Photo article</button>
+  </div>
+
   <div class="input-card">
-    <label class="input-label">Raw headline, article text, URL, or topic</label>
+    <label class="input-label" id="inputLabel">Raw headline, article text, URL, or topic</label>
+    <p class="input-hint" id="inputHint" style="display:none">Paste a text description, a direct image URL (.jpg/.png/.webp), or any page link — the tool will figure out the rest.</p>
     <textarea id="mainInput" placeholder="Paste a raw headline, article text, URL, or describe the story…"></textarea>
+    <div class="input-type-badge" id="inputTypeBadge">
+      <div class="input-type-dot" id="inputTypeDot"></div>
+      <span id="inputTypeText"></span>
+    </div>
+
+    <div class="photo-fields" id="photoFields">
+      <div class="photo-row">
+        <div class="field-group">
+          <label>Photo count</label>
+          <input type="text" id="photoCount" placeholder="e.g. 30+, 15+, 40+" />
+        </div>
+        <div class="field-group">
+          <label>Article subtype</label>
+          <select id="photoSubtype">
+            <option value="transformation">Transformation / look change</option>
+            <option value="family">Family / kids / relationship</option>
+            <option value="love_story">Love story / couple</option>
+            <option value="career">Career journey / rise to fame</option>
+            <option value="outfits">Outfits / red carpet / style</option>
+            <option value="then_now_cast">Then & now / cast reunion</option>
+            <option value="biography">Biography / life story</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <div class="btn-row">
       <button class="gen-btn" id="genBtn" onclick="generate('all')">Generate all 5 angles</button>
       <button class="angle-btn" id="regenBtn" onclick="generate('more')" style="display:none">+ More headlines</button>
     </div>
     <div id="status"></div>
+  </div>
+
+  <div class="intrigue-card">
+    <div class="intrigue-header">
+      <span class="intrigue-label">Intrigue</span>
+      <span class="optional-badge">optional</span>
+    </div>
+    <textarea id="intrigueInput" placeholder="Specify the core hook you want all headlines to build around — e.g. "He was hiding his identity for 12 years""></textarea>
   </div>
 
   <div id="errorBar" class="error-bar"></div>
@@ -114,7 +190,7 @@ textarea#mainInput:focus { border-color: #c8b89a; }
 </div>
 
 <script>
-const DEFAULT_PROMPT = `## ABSOLUTE RULE — ZERO INVENTED FACTS
+const NEWS_PROMPT = `## ABSOLUTE RULE — ZERO INVENTED FACTS
 NEVER invent quotes, numbers, timestamps, or details not present in the input.
 NEVER write "She said...", "He revealed...", "Sources claim..." unless that exact quote was provided.
 If only a raw headline is given — work ONLY with those words.
@@ -196,7 +272,91 @@ kill/killer · murder · attack · assault · shoot/shooting · stab · blood/go
 ## FORBIDDEN PATTERNS — NEVER USE
 "turned into a nightmare" · "ended in disaster" · "what happened next will shock you" · "this changes everything" · "the shocking reason behind" · "you won't believe" · "wait until you see" · "heartbreaking betrayal" · "shocking twist" · "jaw-dropping moment" · "fans are furious" · "sparks outrage" · "comment YES if" · "tag someone who" · "share if you agree" · "everyone is talking about"`;
 
-const ANGLES = [
+const PHOTO_PROMPT = `## ABSOLUTE RULE — ZERO INVENTED FACTS
+NEVER invent quotes, numbers, or details not present in the input.
+If a photo count is provided, always use exactly that. If not, use "30+" as default.
+
+## ROLE
+You are an expert headline writer for a Facebook celebrity/entertainment page specializing in PHOTO ARTICLES — posts that drive clicks to galleries of 10–50+ photos.
+
+## INPUT TYPES — HOW TO HANDLE THEM
+You may receive three types of input:
+1. TEXT DESCRIPTION — Use the facts and details provided directly
+2. IMAGE ANALYSIS — You will receive visual content; analyze who is in the image, what they are doing, what is notable or striking about the photo, the setting, mood, outfits, expressions, body language. Extract every compelling detail that could become a headline hook.
+3. PAGE/URL METADATA — You will receive extracted text from a web page; use the captions, names, event details, and context provided
+
+In all cases: identify the most compelling visual hook — what makes these photos interesting to click on? What would a reader want to SEE? What is rare, surprising, warm, dramatic, or intimate about these images?
+
+## PHOTO DESCRIPTOR SELECTION — CHOOSE THE BEST ONE
+Based on the content you analyze, choose the most accurate and compelling descriptor:
+- RARE — photos that are hard to find or seldom published
+- LITTLE-SEEN — slightly more public than rare but still not widely circulated
+- PRIVATE — personal/family moments not meant for public
+- INTIMATE — emotionally close moments, affectionate, behind-the-scenes personal
+- WILD / BOLD — outrageous outfits, unexpected moments, dramatic events
+- THEN-AND-NOW — explicitly comparing past and present looks
+- BEFORE-AND-AFTER — showing a transformation or change
+- BEHIND-THE-SCENES — backstage, off-camera, candid event moments
+- GENUINE / CANDID — unposed, authentic moments
+
+DO NOT default to RARE every time. Pick the descriptor that best fits the actual content.
+
+## STYLE REFERENCE — TOP-PERFORMING PHOTO ARTICLE EXAMPLES
+Study these patterns. Do NOT copy — use as a style compass:
+
+1. Seal Was "The First One to Change a Diaper" for Heidi Klum's Firstborn — 30+ THEN-AND-NOW PHOTOS Show HOW IT ALL TURNED OUT After Divorce
+2. Plastic Surgeons Reveal WHY KRISTI NOEM LOOKS SO DIFFERENT at 54 (Showcased in 30+ Photos)
+3. "L.A. Law" Star Ditches Wife of 27 Years and 3 Kids for a "Crazy-Bright Girl" He Met at 16 — SHOCKING TIMELINE IN 30+ PHOTOS
+4. Hawke & Thurman's Daughter Earns the Title of "Best Wedding Dress Ever," Looking IDENTICAL to Her Mom — 15+ INTIMATE PHOTOS of the Bride and Her Famous Husband
+5. Ethan Hawke Showed Up as the "Priest," Uma Thurman Met Her Ex, and A-Listers Celebrated — 15+ PICS From Maya Hawke's Wedding HIDDEN FROM PUBLIC EYES
+6. 10 LITTLE-SEEN PHOTOS of Tiger Woods' Ex Elin Nordegren
+7. 30+ RARE PICS of Enrique Iglesias & Anna Kournikova's 3 Blond Kids Whom Their Superstar Dad Put Above His Career
+8. Russell Wilson Was a Rising NFL Star When He Found His Faith With a Heartbroken Single Mom — 40+ PRIVATE IMAGES Show the American's "Favorite" Family of Six
+9. Once a Single Mom With a Broken Heart, Ciara Found True Love With a Devoted Christian — 40+ Photos of Her "Breathtaking" FAMILY OF SIX
+10. Raised in Brooklyn With 7 Siblings, Caught Up in a Mortgage CONTROVERSY, & Helped Prosecute Her Ally — Letitia James' JOURNEY IN 30+ PICS
+11. 30+ PHOTOS of Tiger Woods' Complicated Love Story, Including a Country Singer, a Nanny, and the Woman He Left at the Airport
+12. Father of 3, Family Rancher, and Successful Businessman — 50+ RARE PHOTOS of Kristi Noem's HUSBAND OF 33 YEARS, Who Stood by Her Before Politics
+13. Artist, Cancer Survivor, & More: How the WIVES of 15 Influential POLITICIANS Look (PICS)
+14. Demi Moore Rocks a "Big Bunny Tail," Jenna Ortega Stuns in a RIPPED NIGHTGOWN & More Wild SAG Awards Outfits in 30+ PHOTOS
+15. Martin Short Survived the "Absolutely Horrible" Loss of His Wife — PICS of the Woman Who Gave Him a 30-Year "Triumph" Marriage
+16. Olympic Gold Medalist Alysa Liu Had an Anonymous Mother — Her LIFE IN 30+ PHOTOS That Shaped a Champion
+17. 40+ PHOTOS of Ciara & Russell Wilson's DREAM LIFE With Four Lookalike Curly-Haired Kids
+18. Cancer Survivor, Single Dad, TV Icon — HOW HE LOOKS NOW AT 59 IN 30+ PICS
+19. Divorce Papers, a Son Out of Wedlock, and Another Woman — The Untold FAMILY DRAMA of Snoop Dogg IN 30+ PHOTOS
+20. This Boy Lived in 13 Foster Homes — Now He's an AWARD-WINNING ACTOR: His LIFE JOURNEY IN 30+ PICS
+
+## OUTPUT FORMAT — ALWAYS 5 ANGLES
+Return ONLY a raw JSON object. No markdown. No explanation:
+{
+  "visual_story": ["headline1", "headline2", "headline3", "headline4", "headline5"],
+  "transformation": ["headline1", "headline2", "headline3", "headline4", "headline5"],
+  "family_love": ["headline1", "headline2", "headline3", "headline4", "headline5"],
+  "rare_access": ["headline1", "headline2", "headline3", "headline4", "headline5"],
+  "journey": ["headline1", "headline2", "headline3", "headline4", "headline5"]
+}
+Each angle must have exactly 5 headlines. 7 if the user asks for more.
+
+## PHOTO ARTICLE ANGLE DEFINITIONS
+
+VISUAL STORY — The photos ARE the story. Lead with what the reader will SEE.
+TRANSFORMATION — Before/after, then/now, on-screen vs real life. Visual contrast.
+FAMILY & LOVE — Intimate family moments, children, relationships, weddings. Warmth drives clicks.
+RARE ACCESS — Exclusivity. These photos are hard to find, hidden, or never seen before.
+JOURNEY — Life arc, career path, rise from humble origins. Bio-style framing.
+
+## CRITICAL RULES
+1. PHOTO COUNT IS MANDATORY — Every headline must end with a specific photo count. If the user provides one, use it exactly. If not, use "30+".
+2. PHOTO COUNT POSITION — Always at the END, after em dash or in parentheses
+3. PHOTO DESCRIPTOR — Choose the most accurate one based on content analysis (see above). Vary across headlines — do not use the same descriptor in every headline.
+4. WARMTH IS ALLOWED — Photo articles can be warm, admiring, nostalgic
+5. ROLE STACKING — "Cancer Survivor, Single Dad, TV Icon — HOW HE LOOKS NOW IN 30+ PICS"
+6. 12–20 words per headline
+7. CAPS on 1–3 highest-impact words per headline
+
+## FORBIDDEN WORDS — NEVER USE
+kill/killer · murder · attack · assault · shoot/shooting · stab · blood/gore · torture · weapon · gun · knife · war · racism · nazi · suicide · self-harm · overdose · sex/sexual · nude · porn · rape · underage · minor · drugs · cocaine · heroin · scam · fraud · fuck · shit · bitch · abortion · miscarriage`;
+
+const NEWS_ANGLES = [
   { key: "shock",       label: "Shock",         icon: "⚡" },
   { key: "inspiration", label: "Inspiration",   icon: "✨" },
   { key: "controversy", label: "Controversy",   icon: "🔥" },
@@ -204,10 +364,74 @@ const ANGLES = [
   { key: "numbers",     label: "Numbers",        icon: "📊" },
 ];
 
-let currentPrompt = localStorage.getItem("headlineMachinePrompt") || DEFAULT_PROMPT;
-let lastInput = "";
+const PHOTO_ANGLES = [
+  { key: "visual_story",   label: "Visual Story",   icon: "📷" },
+  { key: "transformation", label: "Transformation", icon: "🔄" },
+  { key: "family_love",    label: "Family & Love",  icon: "🤍" },
+  { key: "rare_access",    label: "Rare Access",    icon: "🔑" },
+  { key: "journey",        label: "Journey",        icon: "🌟" },
+];
+
+let currentMode = 'news';
+let currentPrompt = localStorage.getItem("headlineMachinePrompt") || NEWS_PROMPT;
 let lastResult = null;
+
 document.getElementById("promptEditorArea").value = currentPrompt;
+
+// ── Input type detection ──────────────────────────────────────────────────────
+const IMAGE_EXTS = /\.(jpg|jpeg|png|webp|gif|avif)(\?.*)?$/i;
+
+function detectInputType(val) {
+  const v = val.trim();
+  if (!v) return null;
+  if (IMAGE_EXTS.test(v) && v.startsWith('http')) return 'image';
+  if (v.startsWith('http')) return 'url';
+  return 'text';
+}
+
+document.getElementById('mainInput').addEventListener('input', function() {
+  if (currentMode !== 'photo') return;
+  const type = detectInputType(this.value);
+  const badge = document.getElementById('inputTypeBadge');
+  const dot = document.getElementById('inputTypeDot');
+  const text = document.getElementById('inputTypeText');
+  if (!type || type === 'text') {
+    badge.classList.remove('visible');
+    return;
+  }
+  badge.classList.add('visible');
+  if (type === 'image') {
+    dot.className = 'input-type-dot img';
+    text.textContent = 'Direct image URL detected — will be analyzed visually';
+  } else {
+    dot.className = 'input-type-dot url';
+    text.textContent = 'Page URL detected — will fetch content automatically';
+  }
+});
+
+// ── Mode ──────────────────────────────────────────────────────────────────────
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeNews').classList.toggle('active', mode === 'news');
+  document.getElementById('modePhoto').classList.toggle('active', mode === 'photo');
+  document.getElementById('photoFields').classList.toggle('visible', mode === 'photo');
+  document.getElementById('inputHint').style.display = mode === 'photo' ? 'block' : 'none';
+  document.getElementById('inputTypeBadge').classList.remove('visible');
+
+  if (mode === 'photo') {
+    document.getElementById('inputLabel').textContent = 'Person, story, or topic for the photo article';
+    document.getElementById('mainInput').placeholder = 'Text description, direct image URL (.jpg/.png/.webp), or any page link — the tool figures out the rest';
+    document.getElementById('intrigueInput').placeholder = 'The visual hook or key detail — e.g. "Their kids all have curly hair like Russell" or "She looked completely different at 25"';
+    currentPrompt = localStorage.getItem("headlineMachinePhotoPrompt") || PHOTO_PROMPT;
+  } else {
+    document.getElementById('inputLabel').textContent = 'Raw headline, article text, URL, or topic';
+    document.getElementById('mainInput').placeholder = 'Paste a raw headline, article text, URL, or describe the story…';
+    document.getElementById('intrigueInput').placeholder = 'Specify the core hook you want all headlines to build around — e.g. "He was hiding his identity for 12 years"';
+    currentPrompt = localStorage.getItem("headlineMachinePrompt") || NEWS_PROMPT;
+  }
+  document.getElementById("promptEditorArea").value = currentPrompt;
+  resetOutput();
+}
 
 function toggleEditor() {
   const wrap = document.getElementById("promptEditorWrap");
@@ -215,28 +439,34 @@ function toggleEditor() {
   wrap.classList.toggle("open");
   btn.classList.toggle("active", wrap.classList.contains("open"));
 }
+
 function savePrompt() {
-  currentPrompt = document.getElementById("promptEditorArea").value;
-  localStorage.setItem("headlineMachinePrompt", currentPrompt);
+  const val = document.getElementById("promptEditorArea").value;
+  currentPrompt = val;
+  localStorage.setItem(currentMode === 'photo' ? "headlineMachinePhotoPrompt" : "headlineMachinePrompt", val);
   showSaved();
 }
+
 function resetPrompt() {
-  document.getElementById("promptEditorArea").value = DEFAULT_PROMPT;
-  currentPrompt = DEFAULT_PROMPT;
-  localStorage.setItem("headlineMachinePrompt", DEFAULT_PROMPT);
+  const def = currentMode === 'photo' ? PHOTO_PROMPT : NEWS_PROMPT;
+  document.getElementById("promptEditorArea").value = def;
+  currentPrompt = def;
+  localStorage.setItem(currentMode === 'photo' ? "headlineMachinePhotoPrompt" : "headlineMachinePrompt", def);
   showSaved();
 }
+
 function showSaved() {
   const b = document.getElementById("savedBadge");
   b.classList.add("show");
   setTimeout(() => b.classList.remove("show"), 2000);
 }
 
+// ── Generate ──────────────────────────────────────────────────────────────────
 async function generate(mode) {
-  const input = document.getElementById("mainInput").value.trim();
-  if (!input) return;
-  lastInput = input;
+  const rawInput = document.getElementById("mainInput").value.trim();
+  if (!rawInput) return;
 
+  const intrigue = document.getElementById("intrigueInput").value.trim();
   const btn = document.getElementById("genBtn");
   const regenBtn = document.getElementById("regenBtn");
   btn.disabled = true;
@@ -244,11 +474,86 @@ async function generate(mode) {
   setStatus(true);
   setError("");
 
-  const userMsg = mode === "more"
-    ? `${input}\n\nGenerate 7 DIFFERENT headlines per angle. Do not repeat any headline from before.`
-    : input;
-
   try {
+    // ── Resolve input ────────────────────────────────────────────────────────
+    let messages = [];
+
+    if (currentMode === 'photo') {
+      const inputType = detectInputType(rawInput);
+
+      if (inputType === 'image') {
+        // Direct image → fetch as base64 and send as vision message
+        setStatusText('Loading image…');
+        let imageData, mediaType;
+        try {
+          const resp = await fetch(rawInput);
+          if (!resp.ok) throw new Error('Image fetch failed');
+          const blob = await resp.blob();
+          mediaType = blob.type || 'image/jpeg';
+          imageData = await blobToBase64(blob);
+        } catch(e) {
+          // If CORS blocks direct fetch, fall back to URL string with instruction
+          imageData = null;
+        }
+
+        if (imageData) {
+          const photoParams = buildPhotoParams(intrigue, mode);
+          messages = [{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageData } },
+              { type: 'text', text: `Analyze this image carefully — who is in it, what are they doing, what is notable (outfits, expressions, setting, mood, body language, visual contrasts). Then generate headlines for a photo article based on what you see.\n\n${photoParams}` }
+            ]
+          }];
+        } else {
+          // CORS fallback: pass URL as text with instruction
+          const photoParams = buildPhotoParams(intrigue, mode);
+          messages = [{ role: 'user', content: `Direct image URL (analyze visually if possible, otherwise use URL context): ${rawInput}\n\n${photoParams}` }];
+        }
+
+      } else if (inputType === 'url') {
+        // Page URL → fetch content via our API proxy approach
+        setStatusText('Fetching page…');
+        let pageContent = '';
+        try {
+          // We call our own /api/fetch endpoint — if not available, fall back gracefully
+          const fetchResp = await fetch('/api/fetch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: rawInput })
+          });
+          if (fetchResp.ok) {
+            const fetchData = await fetchResp.json();
+            pageContent = fetchData.text || fetchData.content || '';
+          }
+        } catch(e) { /* server doesn't have /api/fetch — use URL as text */ }
+
+        const photoParams = buildPhotoParams(intrigue, mode);
+        if (pageContent) {
+          messages = [{ role: 'user', content: `Page content fetched from ${rawInput}:\n\n${pageContent.slice(0, 4000)}\n\n${photoParams}` }];
+        } else {
+          messages = [{ role: 'user', content: `Page URL: ${rawInput}\n\nBased on the URL and any context you can infer, generate photo article headlines.\n\n${photoParams}` }];
+        }
+
+      } else {
+        // Plain text
+        const photoParams = buildPhotoParams(intrigue, mode);
+        messages = [{ role: 'user', content: `${rawInput}\n\n${photoParams}` }];
+      }
+
+    } else {
+      // News mode — plain text always
+      let userMsg = rawInput;
+      if (intrigue) {
+        userMsg += `\n\n---\nINTRIGUE — USE THIS AS THE CORE HOOK FOR ALL HEADLINES:\n"${intrigue}"\n\nAll 5 angles and every headline must be built around this specific intrigue. Each angle approaches the same intrigue from a different emotional and structural lens.`;
+      }
+      if (mode === "more") {
+        userMsg += `\n\nGenerate 7 DIFFERENT headlines per angle. Do not repeat any headline from before.`;
+      }
+      messages = [{ role: 'user', content: userMsg }];
+    }
+
+    setStatusText('Generating…');
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -256,9 +561,10 @@ async function generate(mode) {
         model: "claude-sonnet-4-6",
         max_tokens: 2000,
         system: currentPrompt,
-        messages: [{ role: "user", content: userMsg }]
+        messages
       })
     });
+
     const data = await res.json();
     if (data.error) throw new Error(data.error.message);
     const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
@@ -267,6 +573,7 @@ async function generate(mode) {
     lastResult = JSON.parse(match[0]);
     renderOutput(lastResult);
     document.getElementById("regenBtn").style.display = "inline-block";
+
   } catch(e) {
     setError("Error: " + e.message);
   }
@@ -276,11 +583,54 @@ async function generate(mode) {
   setStatus(false);
 }
 
-function setStatus(loading) {
-  document.getElementById("status").innerHTML = loading
-    ? '<span class="dot"></span><span class="dot"></span><span class="dot"></span>'
-    : "";
+function buildPhotoParams(intrigue, mode) {
+  const photoCount = document.getElementById('photoCount').value.trim() || '30+';
+  const photoSubtype = document.getElementById('photoSubtype').value;
+  const subtypeLabels = {
+    transformation: 'transformation / physical change over time',
+    family: 'family life, kids, or relationship',
+    love_story: 'love story or couple journey',
+    career: 'career journey or rise to fame',
+    outfits: 'outfits, style, or red carpet looks',
+    then_now_cast: 'then & now or cast reunion',
+    biography: 'biography or life story',
+    other: 'general / other (choose the best angle based on the content)'
+  };
+
+  let params = `PHOTO ARTICLE PARAMETERS:\n- Photo count: ${photoCount}\n- Article subtype: ${subtypeLabels[photoSubtype] || photoSubtype}\n- Photo descriptor: Choose the most accurate descriptor based on the content (rare, little-seen, private, intimate, wild, then-and-now, before-and-after, behind-the-scenes, genuine/candid). Vary descriptors across headlines — do NOT use the same word every time.\n\nEvery headline MUST end with the photo count "${photoCount}" + chosen descriptor + PHOTOS/PICS/IMAGES.`;
+
+  if (intrigue) {
+    params += `\n\nINTRIGUE — USE THIS AS THE CORE HOOK FOR ALL HEADLINES:\n"${intrigue}"\n\nAll 5 angles and every headline must be built around this specific intrigue.`;
+  }
+
+  if (mode === "more") {
+    params += `\n\nGenerate 7 DIFFERENT headlines per angle. Do not repeat any headline from before.`;
+  }
+
+  return params;
 }
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function setStatus(loading) {
+  if (!loading) {
+    document.getElementById("status").innerHTML = "";
+    return;
+  }
+  document.getElementById("status").innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+}
+
+function setStatusText(text) {
+  document.getElementById("status").innerHTML = `<span style="color:#6b6560;font-size:13px">${text}</span>`;
+}
+
 function setError(msg) {
   const el = document.getElementById("errorBar");
   el.style.display = msg ? "block" : "none";
@@ -292,11 +642,18 @@ function renderOutput(result) {
   const sections = document.getElementById("anglesSections");
   out.style.display = "block";
 
-  sections.innerHTML = ANGLES.map(a => {
+  const angles = currentMode === 'photo' ? PHOTO_ANGLES : NEWS_ANGLES;
+  const badgeClass = currentMode === 'photo' ? 'photo' : 'news';
+  const badgeLabel = currentMode === 'photo' ? 'Photo' : 'News';
+
+  sections.innerHTML = angles.map(a => {
     const headlines = result[a.key] || [];
     return `<div class="angle-section">
-      <div class="angle-title"><span class="angle-icon">${a.icon}</span>${a.label}</div>
-      ${headlines.map((h, i) => `
+      <div class="angle-title">
+        <span class="angle-icon">${a.icon}</span>${a.label}
+        <span class="mode-badge ${badgeClass}">${badgeLabel}</span>
+      </div>
+      ${headlines.map((h) => `
         <div class="headline-item">
           <div class="headline-text">${h}</div>
           <button class="copy-hl" onclick="copyHeadline(this, '${h.replace(/'/g, "\\'")}')">Copy</button>
@@ -317,7 +674,8 @@ function copyHeadline(btn, text) {
 
 function copyAll() {
   if (!lastResult) return;
-  const lines = ANGLES.flatMap(a => {
+  const angles = currentMode === 'photo' ? PHOTO_ANGLES : NEWS_ANGLES;
+  const lines = angles.flatMap(a => {
     const hs = lastResult[a.key] || [];
     return [`\n${a.label.toUpperCase()}`, ...hs];
   });
@@ -331,9 +689,10 @@ function copyAll() {
 function resetOutput() {
   document.getElementById("output").style.display = "none";
   document.getElementById("mainInput").value = "";
+  document.getElementById("intrigueInput").value = "";
   document.getElementById("regenBtn").style.display = "none";
+  document.getElementById('inputTypeBadge').classList.remove('visible');
   lastResult = null;
-  lastInput = "";
 }
 
 document.getElementById("mainInput").addEventListener("keydown", e => {
