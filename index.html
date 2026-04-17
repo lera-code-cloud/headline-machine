@@ -11,9 +11,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 header { background: #1a1a1a; border-bottom: 0.5px solid #2e2e2e; padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
 .header-left h1 { font-size: 16px; font-weight: 500; color: #e8e0d8; }
 .header-left p { font-size: 12px; color: #6b6560; margin-top: 2px; }
+.header-right { display: flex; gap: 8px; align-items: center; }
 .settings-btn { background: none; border: 0.5px solid #2e2e2e; border-radius: 8px; padding: 7px 16px; font-size: 12px; font-family: inherit; color: #6b6560; cursor: pointer; letter-spacing: .04em; transition: border-color .2s, color .2s; }
 .settings-btn:hover { border-color: #c8b89a; color: #e8e0d8; }
 .settings-btn.active { border-color: #c8b89a; color: #c8b89a; }
+.bank-nav-btn { background: none; border: 0.5px solid #2e2e2e; border-radius: 8px; padding: 7px 16px; font-size: 12px; font-family: inherit; color: #6b6560; cursor: pointer; letter-spacing: .04em; transition: all .2s; display: flex; align-items: center; gap: 6px; }
+.bank-nav-btn:hover { border-color: #c8b89a; color: #e8e0d8; }
+.bank-nav-btn.active { border-color: #c8b89a; color: #c8b89a; }
+.bank-count { background: #2e2e2e; border-radius: 10px; padding: 1px 7px; font-size: 11px; color: #9a8f85; transition: background .2s; }
+.bank-nav-btn.active .bank-count { background: #3a2e1e; color: #c8b89a; }
 
 .prompt-editor { display: none; background: #1a1a1a; border: 0.5px solid #2e2e2e; border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; }
 .prompt-editor.open { display: block; }
@@ -29,6 +35,10 @@ header { background: #1a1a1a; border-bottom: 0.5px solid #2e2e2e; padding: 18px 
 #promptEditorArea { width: 100%; background: #111; border: 0.5px solid #2e2e2e; border-radius: 10px; padding: 16px; font-size: 13px; font-family: 'SF Mono', 'Fira Code', monospace; color: #c8b89a; resize: vertical; min-height: 220px; outline: none; transition: border-color .2s; line-height: 1.6; }
 #promptEditorArea:focus { border-color: #c8b89a; }
 
+/* ── VIEWS ── */
+#mainView { display: block; }
+#bankView { display: none; }
+
 .container { max-width: 820px; margin: 0 auto; padding: 28px 20px; }
 
 .mode-toggle { display: flex; gap: 0; margin-bottom: 20px; border: 0.5px solid #2e2e2e; border-radius: 10px; overflow: hidden; width: fit-content; }
@@ -43,7 +53,6 @@ textarea#mainInput { width: 100%; background: #111; border: 0.5px solid #2e2e2e;
 textarea#mainInput::placeholder { color: #4a4540; }
 textarea#mainInput:focus { border-color: #c8b89a; }
 
-/* input type indicator */
 .input-type-badge { display: none; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; color: #6b6560; }
 .input-type-badge.visible { display: flex; }
 .input-type-dot { width: 6px; height: 6px; border-radius: 50%; background: #c8b89a; flex-shrink: 0; }
@@ -89,18 +98,81 @@ textarea#intrigueInput:focus { border-color: #c8b89a; }
 .headline-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid #2e2e2e; }
 .headline-item:last-child { border-bottom: none; padding-bottom: 0; }
 .headline-text { font-size: 14px; line-height: 1.6; color: #d4ccc4; flex: 1; }
-.copy-hl { background: none; border: 0.5px solid #2e2e2e; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-family: inherit; color: #6b6560; cursor: pointer; white-space: nowrap; transition: all .2s; flex-shrink: 0; }
+.headline-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.copy-hl { background: none; border: 0.5px solid #2e2e2e; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-family: inherit; color: #6b6560; cursor: pointer; white-space: nowrap; transition: all .2s; }
 .copy-hl:hover { border-color: #c8b89a; color: #e8e0d8; }
 .copy-hl.copied { color: #7ab060; border-color: #7ab060; }
+.save-hl { background: none; border: 0.5px solid #2e2e2e; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-family: inherit; color: #6b6560; cursor: pointer; white-space: nowrap; transition: all .2s; }
+.save-hl:hover { border-color: #c8b89a; color: #e8e0d8; }
+.save-hl.saved { color: #c8b89a; border-color: #c8b89a; }
 
-.output-toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; gap: 8px; }
+.output-toolbar { display: flex; justify-content: space-between; margin-bottom: 16px; gap: 8px; align-items: center; }
+.output-toolbar-right { display: flex; gap: 8px; }
 .tool-btn { background: none; border: 0.5px solid #2e2e2e; border-radius: 8px; padding: 7px 16px; font-size: 12px; font-family: inherit; color: #9a8f85; cursor: pointer; transition: all .2s; }
 .tool-btn:hover { border-color: #c8b89a; color: #e8e0d8; }
+.save-all-btn { background: none; border: 0.5px solid #c8b89a; border-radius: 8px; padding: 7px 16px; font-size: 12px; font-family: inherit; color: #c8b89a; cursor: pointer; transition: all .2s; }
+.save-all-btn:hover { background: #c8b89a; color: #121212; }
 .error-bar { background: #1a1a1a; border: 0.5px solid #c87070; color: #c87070; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; display: none; }
 
 .mode-badge { display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 5px; margin-left: 6px; vertical-align: middle; }
 .mode-badge.news { background: #1f2a1f; color: #7ab060; border: 0.5px solid #3a5a3a; }
 .mode-badge.photo { background: #2a1f2a; color: #c8a0e8; border: 0.5px solid #5a3a6a; }
+
+/* ══════════════════════════════════════════════
+   BANK VIEW
+══════════════════════════════════════════════ */
+.bank-header { margin-bottom: 24px; }
+.bank-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.bank-title { font-size: 20px; font-weight: 500; color: #e8e0d8; }
+.bank-subtitle { font-size: 13px; color: #6b6560; margin-top: 3px; }
+.bank-clear-btn { background: none; border: 0.5px solid #2e2e2e; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-family: inherit; color: #6b6560; cursor: pointer; transition: all .2s; }
+.bank-clear-btn:hover { border-color: #c87070; color: #c87070; }
+
+.bank-search-wrap { position: relative; margin-bottom: 20px; }
+.bank-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #4a4540; font-size: 14px; pointer-events: none; }
+#bankSearch { width: 100%; background: #1a1a1a; border: 0.5px solid #2e2e2e; border-radius: 10px; padding: 12px 14px 12px 38px; font-size: 14px; font-family: inherit; color: #e8e0d8; outline: none; transition: border-color .2s; }
+#bankSearch::placeholder { color: #4a4540; }
+#bankSearch:focus { border-color: #c8b89a; }
+.bank-search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #4a4540; cursor: pointer; font-size: 16px; padding: 2px 6px; display: none; transition: color .2s; }
+.bank-search-clear:hover { color: #e8e0d8; }
+.bank-search-clear.visible { display: block; }
+
+.bank-stats { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.bank-stat { background: #1a1a1a; border: 0.5px solid #2e2e2e; border-radius: 10px; padding: 10px 16px; }
+.bank-stat-num { font-size: 20px; font-weight: 500; color: #c8b89a; }
+.bank-stat-label { font-size: 11px; color: #6b6560; margin-top: 2px; }
+
+.bank-empty { text-align: center; padding: 60px 20px; color: #4a4540; }
+.bank-empty-icon { font-size: 40px; margin-bottom: 12px; }
+.bank-empty-text { font-size: 14px; line-height: 1.6; }
+.bank-no-results { text-align: center; padding: 40px 20px; color: #4a4540; font-size: 14px; }
+
+.bank-group { margin-bottom: 20px; }
+.bank-group-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid #2e2e2e; margin-bottom: 2px; }
+.bank-group-title { font-size: 11px; font-weight: 500; color: #6b6560; text-transform: uppercase; letter-spacing: .08em; }
+.bank-group-meta { font-size: 11px; color: #4a4540; }
+
+.bank-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid #1f1f1f; }
+.bank-item:last-child { border-bottom: none; }
+.bank-item-left { flex: 1; min-width: 0; }
+.bank-item-text { font-size: 14px; line-height: 1.6; color: #d4ccc4; }
+.bank-item-text mark { background: #3a2e1e; color: #c8b89a; border-radius: 2px; padding: 0 2px; }
+.bank-item-meta { font-size: 11px; color: #4a4540; margin-top: 4px; display: flex; gap: 8px; align-items: center; }
+.bank-item-angle { background: #1f1f1f; border: 0.5px solid #2e2e2e; border-radius: 4px; padding: 1px 6px; }
+.bank-item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.bank-copy-btn { background: none; border: 0.5px solid #2e2e2e; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-family: inherit; color: #6b6560; cursor: pointer; white-space: nowrap; transition: all .2s; }
+.bank-copy-btn:hover { border-color: #c8b89a; color: #e8e0d8; }
+.bank-copy-btn.copied { color: #7ab060; border-color: #7ab060; }
+.bank-delete-btn { background: none; border: 0.5px solid #2e2e2e; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-family: inherit; color: #4a4540; cursor: pointer; transition: all .2s; }
+.bank-delete-btn:hover { border-color: #c87070; color: #c87070; }
+
+.bank-toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+.bank-export-btn { background: none; border: 0.5px solid #2e2e2e; border-radius: 8px; padding: 7px 16px; font-size: 12px; font-family: inherit; color: #9a8f85; cursor: pointer; transition: all .2s; }
+.bank-export-btn:hover { border-color: #c8b89a; color: #e8e0d8; }
+
+/* toast */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: #2e2e2e; border: 0.5px solid #3e3e3e; color: #e8e0d8; border-radius: 10px; padding: 10px 20px; font-size: 13px; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; z-index: 100; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -110,9 +182,14 @@ textarea#intrigueInput:focus { border-color: #c8b89a; }
     <h1>headline machine</h1>
     <p>5 angles · proven CTR patterns</p>
   </div>
-  <button class="settings-btn" id="settingsToggle" onclick="toggleEditor()">Prompt editor</button>
+  <div class="header-right">
+    <button class="bank-nav-btn" id="bankNavBtn" onclick="showView('bank')">🗄 Bank <span class="bank-count" id="bankCountBadge">0</span></button>
+    <button class="settings-btn" id="settingsToggle" onclick="toggleEditor()">Prompt editor</button>
+  </div>
 </header>
 
+<!-- ══ MAIN VIEW ══ -->
+<div id="mainView">
 <div class="container">
 
   <div class="prompt-editor" id="promptEditorWrap">
@@ -181,13 +258,49 @@ textarea#intrigueInput:focus { border-color: #c8b89a; }
 
   <div id="output">
     <div class="output-toolbar">
-      <button class="tool-btn" onclick="copyAll()">Copy all</button>
-      <button class="tool-btn" onclick="resetOutput()">Clear</button>
+      <div class="output-toolbar-right">
+        <button class="tool-btn" onclick="copyAll()">Copy all</button>
+        <button class="tool-btn" onclick="resetOutput()">Clear</button>
+      </div>
     </div>
     <div id="anglesSections"></div>
   </div>
 
 </div>
+</div>
+
+<!-- ══ BANK VIEW ══ -->
+<div id="bankView">
+<div class="container">
+
+  <div class="bank-header">
+    <div class="bank-title-row">
+      <div>
+        <div class="bank-title">Headline Bank</div>
+        <div class="bank-subtitle">All saved headlines in one place</div>
+      </div>
+      <button class="bank-clear-btn" onclick="clearBank()">Clear all</button>
+    </div>
+
+    <div class="bank-search-wrap">
+      <span class="bank-search-icon">🔍</span>
+      <input type="text" id="bankSearch" placeholder="Search by keyword…" oninput="handleBankSearch(this.value)">
+      <button class="bank-search-clear" id="bankSearchClear" onclick="clearBankSearch()">×</button>
+    </div>
+
+    <div class="bank-stats" id="bankStats"></div>
+  </div>
+
+  <div class="bank-toolbar" id="bankToolbar" style="display:none">
+    <button class="bank-export-btn" onclick="exportBank()">Export as .txt</button>
+  </div>
+
+  <div id="bankList"></div>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 const NEWS_PROMPT = `## ABSOLUTE RULE — ZERO INVENTED FACTS
@@ -378,6 +491,212 @@ let lastResult = null;
 
 document.getElementById("promptEditorArea").value = currentPrompt;
 
+// ── BANK ─────────────────────────────────────────────────────────────────────
+function loadBank() {
+  try { return JSON.parse(localStorage.getItem('headlineBank') || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveBank(bank) {
+  localStorage.setItem('headlineBank', JSON.stringify(bank));
+  updateBankBadge();
+}
+
+function updateBankBadge() {
+  const bank = loadBank();
+  document.getElementById('bankCountBadge').textContent = bank.length;
+}
+
+function addToBank(headline, angle, mode) {
+  const bank = loadBank();
+  // Avoid exact duplicates
+  if (bank.some(item => item.text === headline)) return false;
+  bank.unshift({
+    id: Date.now() + Math.random(),
+    text: headline,
+    angle,
+    mode,
+    savedAt: new Date().toISOString()
+  });
+  saveBank(bank);
+  return true;
+}
+
+function removeFromBank(id) {
+  const bank = loadBank().filter(item => item.id !== id);
+  saveBank(bank);
+}
+
+function clearBank() {
+  if (!confirm('Clear all headlines from the bank?')) return;
+  localStorage.removeItem('headlineBank');
+  updateBankBadge();
+  renderBank('');
+}
+
+// ── VIEWS ─────────────────────────────────────────────────────────────────────
+function showView(view) {
+  document.getElementById('mainView').style.display = view === 'main' ? 'block' : 'none';
+  document.getElementById('bankView').style.display = view === 'bank' ? 'block' : 'none';
+  document.getElementById('bankNavBtn').classList.toggle('active', view === 'bank');
+  if (view === 'bank') {
+    document.getElementById('bankSearch').value = '';
+    document.getElementById('bankSearchClear').classList.remove('visible');
+    renderBank('');
+  }
+}
+
+// Back to generator when clicking logo
+document.querySelector('.header-left').style.cursor = 'pointer';
+document.querySelector('.header-left').onclick = () => showView('main');
+
+// ── BANK SEARCH & RENDER ──────────────────────────────────────────────────────
+function handleBankSearch(val) {
+  document.getElementById('bankSearchClear').classList.toggle('visible', val.length > 0);
+  renderBank(val.trim().toLowerCase());
+}
+
+function clearBankSearch() {
+  document.getElementById('bankSearch').value = '';
+  document.getElementById('bankSearchClear').classList.remove('visible');
+  renderBank('');
+}
+
+function highlight(text, query) {
+  if (!query) return escapeHtml(text);
+  const escaped = escapeHtml(text);
+  const escapedQ = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(new RegExp(escapedQ, 'gi'), m => `<mark>${m}</mark>`);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderBank(query) {
+  const bank = loadBank();
+  const list = document.getElementById('bankList');
+  const stats = document.getElementById('bankStats');
+  const toolbar = document.getElementById('bankToolbar');
+
+  if (bank.length === 0) {
+    stats.innerHTML = '';
+    toolbar.style.display = 'none';
+    list.innerHTML = `<div class="bank-empty"><div class="bank-empty-icon">🗄</div><div class="bank-empty-text">No headlines saved yet.<br>Generate headlines and click "Save to Bank" or "+ Save all to Bank".</div></div>`;
+    return;
+  }
+
+  toolbar.style.display = 'flex';
+
+  // Stats
+  const newsCount = bank.filter(i => i.mode === 'news').length;
+  const photoCount = bank.filter(i => i.mode === 'photo').length;
+  stats.innerHTML = `
+    <div class="bank-stat"><div class="bank-stat-num">${bank.length}</div><div class="bank-stat-label">Total</div></div>
+    ${newsCount ? `<div class="bank-stat"><div class="bank-stat-num">${newsCount}</div><div class="bank-stat-label">News</div></div>` : ''}
+    ${photoCount ? `<div class="bank-stat"><div class="bank-stat-num">${photoCount}</div><div class="bank-stat-label">Photo</div></div>` : ''}
+  `;
+
+  // Filter
+  const filtered = query ? bank.filter(i => i.text.toLowerCase().includes(query)) : bank;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="bank-no-results">No headlines match "<strong>${escapeHtml(query)}</strong>"</div>`;
+    return;
+  }
+
+  // Group by date
+  const groups = {};
+  filtered.forEach(item => {
+    const d = new Date(item.savedAt);
+    const label = formatGroupDate(d);
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(item);
+  });
+
+  list.innerHTML = Object.entries(groups).map(([label, items]) => `
+    <div class="bank-group">
+      <div class="bank-group-header">
+        <span class="bank-group-title">${label}</span>
+        <span class="bank-group-meta">${items.length} headline${items.length !== 1 ? 's' : ''}</span>
+      </div>
+      ${items.map(item => `
+        <div class="bank-item" id="bi-${item.id}">
+          <div class="bank-item-left">
+            <div class="bank-item-text">${highlight(item.text, query)}</div>
+            <div class="bank-item-meta">
+              <span class="bank-item-angle">${item.angle}</span>
+              <span class="mode-badge ${item.mode}">${item.mode}</span>
+            </div>
+          </div>
+          <div class="bank-item-actions">
+            <button class="bank-copy-btn" onclick="bankCopy(this, '${escapeHtml(item.text).replace(/'/g,"\\'")}')">Copy</button>
+            <button class="bank-delete-btn" onclick="bankDelete(${item.id})">✕</button>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function formatGroupDate(d) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const itemDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diff = (today - itemDay) / 86400000;
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Yesterday';
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+function bankCopy(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function bankDelete(id) {
+  removeFromBank(id);
+  const el = document.getElementById('bi-' + id);
+  if (el) { el.style.opacity = '0'; el.style.transition = 'opacity .2s'; setTimeout(() => renderBank(document.getElementById('bankSearch').value.trim().toLowerCase()), 200); }
+}
+
+function exportBank() {
+  const bank = loadBank();
+  const query = document.getElementById('bankSearch').value.trim().toLowerCase();
+  const filtered = query ? bank.filter(i => i.text.toLowerCase().includes(query)) : bank;
+  const lines = filtered.map(i => `[${i.mode.toUpperCase()} · ${i.angle}]\n${i.text}`).join('\n\n');
+  const blob = new Blob([lines], { type: 'text/plain' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'headline-bank.txt'; a.click();
+}
+
+// ── SAVE TO BANK ──────────────────────────────────────────────────────────────
+function saveToBank(headline, angle) {
+  const added = addToBank(headline, angle, currentMode);
+  showToast(added ? '✓ Saved to Bank' : 'Already in Bank');
+  updateBankBadge();
+}
+
+function saveAllToBank() {
+  if (!lastResult) return;
+  const angles = currentMode === 'photo' ? PHOTO_ANGLES : NEWS_ANGLES;
+  let added = 0;
+  angles.forEach(a => {
+    (lastResult[a.key] || []).forEach(h => {
+      if (addToBank(h, a.label, currentMode)) added++;
+    });
+  });
+  showToast(added ? `✓ ${added} headline${added !== 1 ? 's' : ''} saved to Bank` : 'All already in Bank');
+  updateBankBadge();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
 // ── Input type detection ──────────────────────────────────────────────────────
 const IMAGE_EXTS = /\.(jpg|jpeg|png|webp|gif|avif)(\?.*)?$/i;
 
@@ -395,18 +714,10 @@ document.getElementById('mainInput').addEventListener('input', function() {
   const badge = document.getElementById('inputTypeBadge');
   const dot = document.getElementById('inputTypeDot');
   const text = document.getElementById('inputTypeText');
-  if (!type || type === 'text') {
-    badge.classList.remove('visible');
-    return;
-  }
+  if (!type || type === 'text') { badge.classList.remove('visible'); return; }
   badge.classList.add('visible');
-  if (type === 'image') {
-    dot.className = 'input-type-dot img';
-    text.textContent = 'Direct image URL detected — will be analyzed visually';
-  } else {
-    dot.className = 'input-type-dot url';
-    text.textContent = 'Page URL detected — will fetch content automatically';
-  }
+  if (type === 'image') { dot.className = 'input-type-dot img'; text.textContent = 'Direct image URL detected — will be analyzed visually'; }
+  else { dot.className = 'input-type-dot url'; text.textContent = 'Page URL detected — will fetch content automatically'; }
 });
 
 // ── Mode ──────────────────────────────────────────────────────────────────────
@@ -475,14 +786,12 @@ async function generate(mode) {
   setError("");
 
   try {
-    // ── Resolve input ────────────────────────────────────────────────────────
     let messages = [];
 
     if (currentMode === 'photo') {
       const inputType = detectInputType(rawInput);
 
       if (inputType === 'image') {
-        // Direct image → fetch as base64 and send as vision message
         setStatusText('Loading image…');
         let imageData, mediaType;
         try {
@@ -491,58 +800,36 @@ async function generate(mode) {
           const blob = await resp.blob();
           mediaType = blob.type || 'image/jpeg';
           imageData = await blobToBase64(blob);
-        } catch(e) {
-          // If CORS blocks direct fetch, fall back to URL string with instruction
-          imageData = null;
-        }
+        } catch(e) { imageData = null; }
 
         if (imageData) {
           const photoParams = buildPhotoParams(intrigue, mode);
-          messages = [{
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageData } },
-              { type: 'text', text: `Analyze this image carefully — who is in it, what are they doing, what is notable (outfits, expressions, setting, mood, body language, visual contrasts). Then generate headlines for a photo article based on what you see.\n\n${photoParams}` }
-            ]
-          }];
+          messages = [{ role: 'user', content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageData } },
+            { type: 'text', text: `Analyze this image carefully — who is in it, what are they doing, what is notable (outfits, expressions, setting, mood, body language, visual contrasts). Then generate headlines for a photo article based on what you see.\n\n${photoParams}` }
+          ]}];
         } else {
-          // CORS fallback: pass URL as text with instruction
           const photoParams = buildPhotoParams(intrigue, mode);
           messages = [{ role: 'user', content: `Direct image URL (analyze visually if possible, otherwise use URL context): ${rawInput}\n\n${photoParams}` }];
         }
-
       } else if (inputType === 'url') {
-        // Page URL → fetch content via our API proxy approach
         setStatusText('Fetching page…');
         let pageContent = '';
         try {
-          // We call our own /api/fetch endpoint — if not available, fall back gracefully
-          const fetchResp = await fetch('/api/fetch', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: rawInput })
-          });
-          if (fetchResp.ok) {
-            const fetchData = await fetchResp.json();
-            pageContent = fetchData.text || fetchData.content || '';
-          }
-        } catch(e) { /* server doesn't have /api/fetch — use URL as text */ }
-
+          const fetchResp = await fetch('/api/fetch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: rawInput }) });
+          if (fetchResp.ok) { const fetchData = await fetchResp.json(); pageContent = fetchData.text || fetchData.content || ''; }
+        } catch(e) {}
         const photoParams = buildPhotoParams(intrigue, mode);
         if (pageContent) {
           messages = [{ role: 'user', content: `Page content fetched from ${rawInput}:\n\n${pageContent.slice(0, 4000)}\n\n${photoParams}` }];
         } else {
           messages = [{ role: 'user', content: `Page URL: ${rawInput}\n\nBased on the URL and any context you can infer, generate photo article headlines.\n\n${photoParams}` }];
         }
-
       } else {
-        // Plain text
         const photoParams = buildPhotoParams(intrigue, mode);
         messages = [{ role: 'user', content: `${rawInput}\n\n${photoParams}` }];
       }
-
     } else {
-      // News mode — plain text always
       let userMsg = rawInput;
       if (intrigue) {
         userMsg += `\n\n---\nINTRIGUE — USE THIS AS THE CORE HOOK FOR ALL HEADLINES:\n"${intrigue}"\n\nAll 5 angles and every headline must be built around this specific intrigue. Each angle approaches the same intrigue from a different emotional and structural lens.`;
@@ -557,12 +844,7 @@ async function generate(mode) {
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 2000,
-        system: currentPrompt,
-        messages
-      })
+      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 2000, system: currentPrompt, messages })
     });
 
     const data = await res.json();
@@ -596,17 +878,13 @@ function buildPhotoParams(intrigue, mode) {
     biography: 'biography or life story',
     other: 'general / other (choose the best angle based on the content)'
   };
-
   let params = `PHOTO ARTICLE PARAMETERS:\n- Photo count: ${photoCount}\n- Article subtype: ${subtypeLabels[photoSubtype] || photoSubtype}\n- Photo descriptor: Choose the most accurate descriptor based on the content (rare, little-seen, private, intimate, wild, then-and-now, before-and-after, behind-the-scenes, genuine/candid). Vary descriptors across headlines — do NOT use the same word every time.\n\nEvery headline MUST end with the photo count "${photoCount}" + chosen descriptor + PHOTOS/PICS/IMAGES.`;
-
   if (intrigue) {
     params += `\n\nINTRIGUE — USE THIS AS THE CORE HOOK FOR ALL HEADLINES:\n"${intrigue}"\n\nAll 5 angles and every headline must be built around this specific intrigue.`;
   }
-
   if (mode === "more") {
     params += `\n\nGenerate 7 DIFFERENT headlines per angle. Do not repeat any headline from before.`;
   }
-
   return params;
 }
 
@@ -620,10 +898,7 @@ function blobToBase64(blob) {
 }
 
 function setStatus(loading) {
-  if (!loading) {
-    document.getElementById("status").innerHTML = "";
-    return;
-  }
+  if (!loading) { document.getElementById("status").innerHTML = ""; return; }
   document.getElementById("status").innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
 }
 
@@ -656,12 +931,33 @@ function renderOutput(result) {
       ${headlines.map((h) => `
         <div class="headline-item">
           <div class="headline-text">${h}</div>
-          <button class="copy-hl" onclick="copyHeadline(this, '${h.replace(/'/g, "\\'")}')">Copy</button>
+          <div class="headline-actions">
+            <button class="copy-hl" onclick="copyHeadline(this, '${h.replace(/'/g,"\\'")}')">Copy</button>
+          </div>
         </div>`).join("")}
     </div>`;
   }).join("");
 
+  // Auto-save all to bank
+  angles.forEach(a => {
+    (result[a.key] || []).forEach(h => addToBank(h, a.label, currentMode));
+  });
+  updateBankBadge();
+
   out.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function saveHeadlineFromOutput(btn, text, angle) {
+  const added = addToBank(text, angle, currentMode);
+  if (added) {
+    btn.textContent = '✓ Saved';
+    btn.classList.add('saved');
+    setTimeout(() => { btn.textContent = '+ Bank'; btn.classList.remove('saved'); }, 2000);
+  } else {
+    btn.textContent = 'In Bank';
+    setTimeout(() => { btn.textContent = '+ Bank'; }, 1500);
+  }
+  updateBankBadge();
 }
 
 function copyHeadline(btn, text) {
@@ -675,10 +971,7 @@ function copyHeadline(btn, text) {
 function copyAll() {
   if (!lastResult) return;
   const angles = currentMode === 'photo' ? PHOTO_ANGLES : NEWS_ANGLES;
-  const lines = angles.flatMap(a => {
-    const hs = lastResult[a.key] || [];
-    return [`\n${a.label.toUpperCase()}`, ...hs];
-  });
+  const lines = angles.flatMap(a => { const hs = lastResult[a.key] || []; return [`\n${a.label.toUpperCase()}`, ...hs]; });
   navigator.clipboard.writeText(lines.join("\n")).then(() => {
     const btn = document.querySelector(".output-toolbar .tool-btn");
     btn.textContent = "Copied!";
@@ -698,6 +991,9 @@ function resetOutput() {
 document.getElementById("mainInput").addEventListener("keydown", e => {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) generate("all");
 });
+
+// Init
+updateBankBadge();
 </script>
 </body>
 </html>
