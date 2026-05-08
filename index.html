@@ -165,6 +165,25 @@ textarea#intrigueInput:focus { border-color: rgba(200,184,154,0.5); background: 
 .bank-export-btn:hover { border-color: #c8b89a; color: #e8e0d8; }
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: #2e2e2e; border: 0.5px solid #3e3e3e; color: #e8e0d8; border-radius: 10px; padding: 10px 20px; font-size: 13px; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; z-index: 100; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .social-lead-wrap {
+  margin: 8px 0 6px 0;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.04);
+  border-left: 2px solid #c9a96e;
+  border-radius: 0 4px 4px 0;
+  min-height: 32px;
+}
+.social-lead-loading {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 2px 0;
+}
+.social-lead-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #b8afa6;
+}
 </style>
 </head>
 <body>
@@ -464,6 +483,32 @@ JOURNEY — Life arc, career path, rise from humble origins. Bio-style framing.
 ## FORBIDDEN WORDS — NEVER USE
 kill/killer · murder · attack · assault · shoot/shooting · stab · blood/gore · torture · weapon · gun · knife · war · racism · nazi · suicide · self-harm · overdose · sex/sexual · nude · porn · rape · underage · minor · drugs · cocaine · heroin · scam · fraud · fuck · shit · bitch · abortion · miscarriage`;
 
+  const SOCIAL_LEAD_PROMPT = `## ROLE
+You are a Facebook social media writer for a news/media publisher page.
+Write Social Leads — captions that appear above the image in a Facebook post.
+
+## RULES FOR EACH LEAD
+- 2–4 sentences total
+- Strong CTR: amplifies the headline's hook or adds an extra emotional layer
+- Must trigger an emotion (curiosity, surprise, concern, warmth, indignation)
+- Must make the reader want to react or comment
+- NO explicit call-to-action phrases: no "Comment below", "Tag a friend", "Click the link", "Read more", "Share if", "Let us know"
+- May include a question to the reader where it feels natural and organic
+- Use emojis where they add energy — not forced
+- LAST sentence must lead the reader toward the comments creatively — NOT dryly. End it with a downward arrow emoji: ⬇️ or 🔽 or ⤵️ or 🔻 or ↓
+- Use "we" and its derivatives where it feels natural — must feel written by real people, not a bot
+- Tone: tabloid — punchy, slightly opinionated, but safe
+- The MOST intriguing words or phrases must be in CAPS (1–3 per lead)
+- Language: English
+
+## ABSOLUTE RULE — ZERO INVENTED FACTS
+NEVER invent quotes, numbers, or details not present in the headline.
+Work ONLY with the words given in each headline.
+
+## OUTPUT FORMAT
+Return ONLY a raw JSON array of exactly 5 strings. No markdown. No explanation. No labels:
+["lead1", "lead2", "lead3", "lead4", "lead5"]`;
+  
 const NEWS_ANGLES = [
   { key: "shock",       label: "Shock",         icon: "⚡" },
   { key: "inspiration", label: "Inspiration",   icon: "✨" },
@@ -883,6 +928,29 @@ function setError(msg) {
   el.textContent = msg;
 }
 
+async function generateLeadsForAngle(headlines) {
+  try {
+    const numbered = headlines.map((h, i) => `${i + 1}. ${h}`).join("\n");
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-no-search": "true" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1500,
+        system: SOCIAL_LEAD_PROMPT,
+        messages: [{ role: "user", content: `Generate a Social Lead for each of these 5 headlines:\n\n${numbered}` }]
+      })
+    });
+    const data = await res.json();
+    const block = (data.content || []).find(b => b.type === "text");
+    const text = block?.text?.trim() || "";
+    const match = text.match(/\[[\s\S]*\]/);
+    if (!match) return headlines.map(() => "");
+    const leads = JSON.parse(match[0]);
+    return Array.isArray(leads) ? leads : headlines.map(() => "");
+  } catch(e) { return headlines.map(() => ""); }
+}
+
 function renderOutput(result) {
   const out = document.getElementById("output");
   const sections = document.getElementById("anglesSections");
@@ -899,11 +967,17 @@ function renderOutput(result) {
         <span class="angle-icon">${a.icon}</span>${a.label}
         <span class="mode-badge ${badgeClass}">${badgeLabel}</span>
       </div>
-      ${headlines.map((h) => `
-        <div class="headline-item">
+      ${headlines.map((h, i) => `
+        <div class="headline-item" id="hl-${a.key}-${i}">
           <div class="headline-text">${h}</div>
+          <div class="social-lead-wrap" id="sl-${a.key}-${i}">
+            <div class="social-lead-loading">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+          </div>
           <div class="headline-actions">
             <button class="copy-hl" onclick="copyHeadline(this, '${h.replace(/'/g,"\\'")}')">Copy</button>
+            <button class="copy-hl copy-lead-btn" id="copy-sl-${a.key}-${i}" style="display:none" onclick="copySocialLead(this, '${a.key}', ${i})">Copy lead</button>
           </div>
         </div>`).join("")}
     </div>`;
@@ -912,6 +986,37 @@ function renderOutput(result) {
   angles.forEach(a => { (result[a.key] || []).forEach(h => addToBank(h, a.label, currentMode)); });
   updateBankBadge();
   out.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  angles.forEach(a => {
+    const headlines = result[a.key] || [];
+    if (!headlines.length) return;
+    generateLeadsForAngle(headlines).then(leads => {
+      headlines.forEach((h, i) => {
+        const wrap = document.getElementById(`sl-${a.key}-${i}`);
+        const copyBtn = document.getElementById(`copy-sl-${a.key}-${i}`);
+        if (!wrap) return;
+        const lead = leads[i] || "";
+        if (lead) {
+          wrap.innerHTML = `<div class="social-lead-text">${lead.replace(/\n/g, "<br>")}</div>`;
+          wrap._leadText = lead;
+          if (copyBtn) copyBtn.style.display = "inline-block";
+        } else {
+          wrap.innerHTML = "";
+        }
+      });
+    });
+  });
+}
+
+function copySocialLead(btn, angleKey, idx) {
+  const wrap = document.getElementById(`sl-${angleKey}-${idx}`);
+  const text = wrap?._leadText || wrap?.querySelector(".social-lead-text")?.innerText || "";
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "Copied!";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = "Copy lead"; btn.classList.remove("copied"); }, 2000);
+  });
 }
 
 function saveHeadlineFromOutput(btn, text, angle) {
