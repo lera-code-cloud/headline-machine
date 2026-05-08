@@ -101,8 +101,7 @@ textarea#intrigueInput:focus { border-color: rgba(200,184,154,0.5); background: 
 .angle-section { background: #1a1a1a; border: 0.5px solid #2e2e2e; border-radius: 14px; padding: 20px 24px; margin-bottom: 14px; }
 .angle-title { font-size: 11px; font-weight: 500; color: #6b6560; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
 .angle-icon { font-size: 14px; }
-.headline-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid #2e2e2e; }
-.headline-item:last-child { border-bottom: none; padding-bottom: 0; }
+.headline-item { display: flex; flex-direction: column; gap: 8px; ....headline-item:last-child { border-bottom: none; padding-bottom: 0; }
 .headline-text { font-size: 14px; line-height: 1.6; color: #d4ccc4; flex: 1; }
 .headline-actions { display: flex; gap: 6px; flex-shrink: 0; }
 .copy-hl { background: none; border: 0.5px solid #2e2e2e; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-family: inherit; color: #6b6560; cursor: pointer; white-space: nowrap; transition: all .2s; }
@@ -976,8 +975,8 @@ function renderOutput(result) {
             </div>
           </div>
           <div class="headline-actions">
-            <button class="copy-hl" onclick="copyHeadline(this, '${h.replace(/'/g,"\\'")}')">Copy</button>
-            <button class="copy-hl copy-lead-btn" id="copy-sl-${a.key}-${i}" style="display:none" onclick="copySocialLead(this, '${a.key}', ${i})">Copy lead</button>
+           <button class="copy-hl" onclick="copyHeadline(this, '${h.replace(/'/g,"\\'")}')">Copy HL</button>
+            <button class="copy-hl copy-lead-btn" id="copy-sl-${a.key}-${i}" style="display:none" onclick="copySocialLead(this, '${a.key}', ${i})">Copy SL</button>
           </div>
         </div>`).join("")}
     </div>`;
